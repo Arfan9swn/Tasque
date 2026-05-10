@@ -12,33 +12,35 @@
 </head>
 <body class="bg-slate-800 text-white">
 
-    <!--navbar-->
-    <div class="flex w-[100%] content-center justify-center p-[20px] bg-slate-600">
-        <div class="flex w-[100%] gap-[50px]">
-            <div class="font-bold text-lg justify-center">
-                Tasque
-            </div>
-                <div class="font-semibold flex gap-[50px] justify-center text-center">
-                    <div class="justify-center">
-                        Tentang
-                    </div>
-                    <div class="justify-center">
-                        List
-                    </div>
-                </div>
-        </div>
-    </div>
+    <?php
+        include "./component/navbar.component.php";
+        echo NavBar();
+    ?>
 
     <div class="ml-[5%] border rounded-[5px] w-[40vw] mt-[25px]">
         <input type="text" class="w-[40vw] focus:outline-none px-[10px] py-[3px]">
     </div>
+
     <div class="flex w-[100%] justify-around mt-[25px]">
+<!--work list-->
         <div class="w-[40%] border rounded-[5px] p-[5px]">
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Laboriosam nostrum nobis consequatur, sunt nemo explicabo illo tenetur, officia corrupti, quos earum quidem minima quaerat ut quo nulla omnis quibusdam totam?
+            <p class="border-b pb-[5px]">Kumpulan Pekerjaan :</p>
+            <div class="border rounded-[5px] w-fit mt-[10px] p-[5px] bg-slate-200 text-slate-700">
+                Tambahkan Pekerjaan +
+            </div>
         </div>
+<!--do list-->
         <div class="w-[40%] border rounded-[5px] p-[5px]">
-            Lorem, ipsum dolor sit amet consectetur adipisicing elit. Nemo aperiam fugiat molestiae consectetur magni magnam et perferendis est non? Iste consectetur itaque velit delectus odio nemo obcaecati ex beatae quo.
+            <p class="border-b pb-[5px]">List Pekerjaan :</p>
+            <div class="border rounded-[5px] w-fit mt-[10px] p-[5px] bg-slate-200 text-slate-700">
+                Tambahkan Pekerjaan +
+            </div>
         </div>
     </div>
+
+    <?php 
+        include "./component/footer.component.php";
+        echo Footer();
+    ?>
 </body>
 </html>
