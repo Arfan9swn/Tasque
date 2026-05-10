@@ -1,6 +1,7 @@
 <?php
     
-    dbConnect()
+    require_once "./dbconn.php";
+    $conn = dbConnect();
 
 ?>
 
