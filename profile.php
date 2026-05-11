@@ -8,7 +8,6 @@ require_login();
 $conn = dbConnect();
 $userId = current_user_id();
 
-// Fetch current user
 $user = null;
 if ($userId !== null) {
     $userIdEsc = (int)$userId;
