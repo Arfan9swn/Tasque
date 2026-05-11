@@ -14,6 +14,9 @@
                             <div class="justify-center">
                                 <a href="./about.php">Tentang</a>
                             </div>
+                            <div class="justify-center">
+                                <a href="./profile.php">Akun</a>
+                            </div>
                         </div>
                 </div>
             </div>
