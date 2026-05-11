@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: May 11, 2026 at 08:03 AM
+-- Generation Time: May 11, 2026 at 02:26 PM
 -- Server version: 8.0.30
 -- PHP Version: 8.1.10
 
@@ -20,6 +20,8 @@ SET time_zone = "+00:00";
 --
 -- Database: `tasque`
 --
+CREATE DATABASE IF NOT EXISTS `tasque` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+USE `tasque`;
 
 -- --------------------------------------------------------
 
@@ -27,11 +29,20 @@ SET time_zone = "+00:00";
 -- Table structure for table `category`
 --
 
+DROP TABLE IF EXISTS `category`;
 CREATE TABLE `category` (
   `cat_id` int NOT NULL,
   `name` varchar(50) NOT NULL,
   `description` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `category`
+--
+
+INSERT INTO `category` (`cat_id`, `name`, `description`) VALUES
+(3, 'Pribadi', 'Pribadi'),
+(4, 'Sekolah', 'Sekolah');
 
 -- --------------------------------------------------------
 
@@ -39,12 +50,13 @@ CREATE TABLE `category` (
 -- Table structure for table `subtask`
 --
 
+DROP TABLE IF EXISTS `subtask`;
 CREATE TABLE `subtask` (
   `subtask_id` int NOT NULL,
   `task_id` int NOT NULL,
   `title` varchar(50) NOT NULL,
   `is_complete` tinyint(1) NOT NULL,
-  `description` text NOT NULL
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
@@ -53,6 +65,7 @@ CREATE TABLE `subtask` (
 -- Table structure for table `task`
 --
 
+DROP TABLE IF EXISTS `task`;
 CREATE TABLE `task` (
   `task_id` int NOT NULL,
   `user_id` int NOT NULL,
@@ -65,12 +78,21 @@ CREATE TABLE `task` (
   `created_at` date NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+--
+-- Dumping data for table `task`
+--
+
+INSERT INTO `task` (`task_id`, `user_id`, `cat_id`, `title`, `description`, `due_date`, `priority`, `status`, `created_at`) VALUES
+(0, 3, 3, 'Cuci Piring', 'Cuci 50 piring', '2026-05-21', 2, 1, '2026-05-11'),
+(0, 3, 4, 'PR', 'Tugas IPA', '2026-05-21', 1, 1, '2026-05-11');
+
 -- --------------------------------------------------------
 
 --
 -- Table structure for table `user`
 --
 
+DROP TABLE IF EXISTS `user`;
 CREATE TABLE `user` (
   `user_id` int NOT NULL,
   `username` varchar(50) NOT NULL,
@@ -128,7 +150,7 @@ ALTER TABLE `user`
 -- AUTO_INCREMENT for table `category`
 --
 ALTER TABLE `category`
-  MODIFY `cat_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `cat_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `user`
@@ -141,12 +163,6 @@ ALTER TABLE `user`
 --
 
 --
--- Constraints for table `category`
---
-ALTER TABLE `category`
-  ADD CONSTRAINT `CAT_ID` FOREIGN KEY (`cat_id`) REFERENCES `task` (`cat_id`) ON DELETE RESTRICT ON UPDATE RESTRICT;
-
---
 -- Constraints for table `subtask`
 --
 ALTER TABLE `subtask`
@@ -156,6 +172,7 @@ ALTER TABLE `subtask`
 -- Constraints for table `task`
 --
 ALTER TABLE `task`
+  ADD CONSTRAINT `CAT_ID` FOREIGN KEY (`cat_id`) REFERENCES `category` (`cat_id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   ADD CONSTRAINT `USER_ID` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE RESTRICT ON UPDATE RESTRICT;
 COMMIT;
 
