@@ -12,6 +12,9 @@
                                 <a href="./index.php">Buat</a>
                             </div>
                             <div class="justify-center">
+                                <a href="./list.php">List</a>
+                            </div>
+                            <div class="justify-center">
                                 <a href="./about.php">Tentang</a>
                             </div>
                             <div class="justify-center">

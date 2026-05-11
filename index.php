@@ -1,5 +1,9 @@
 <?php
 
+ini_set('display_errors', '1');
+ini_set('display_startup_errors', '1');
+error_reporting(E_ALL);
+
     // * jangan dihapus
     require_once "./auth.php";
     require_once "./dbconn.php";
@@ -40,6 +44,14 @@
                 $cat_id = (int)($_POST['cat_id'] ?? 0);
 
                 if ($title !== '' && $description !== '' && $due_date !== '' && $cat_id > 0) {
+                    $taskIdRes = $conn->query("SELECT COALESCE(MAX(task_id), 0) AS next_id FROM task");
+                    $nextTaskId = 0;
+                    if ($taskIdRes && $taskIdRes->num_rows > 0) {
+                        $rowNext = $taskIdRes->fetch_assoc();
+                        $nextTaskId = (int)($rowNext['next_id'] ?? 0) + 1;
+                    }
+
+                    
                     $titleEsc = $conn->real_escape_string($title);
                     $descEsc = $conn->real_escape_string($description);
 
@@ -51,17 +63,39 @@
             }
 
             if ($action === 'add_subtask') {
-                $task_id = (int)($_POST['task_id'] ?? 0);
+                    $task_id = (int)($_POST['task_id'] ?? 0);
+                
+
                 $title = trim((string)($_POST['subtask_title'] ?? ''));
                 $is_complete = isset($_POST['is_complete']) ? 1 : 0;
 
-                if ($task_id > 0 && $title !== '') {
-                    $titleEsc = $conn->real_escape_string($title);
-                    $conn->query("INSERT INTO subtask (task_id, title, is_complete) VALUES ($task_id, '$titleEsc', $is_complete)");
-                    $flash = 'Subtask berhasil ditambahkan.';
-                } else {
-                    $flash = 'Lengkapi data subtask (task dan judul).';
+                $description = trim((string)($_POST['subtask_description'] ?? ''));
+
+                if ($description === '') {
+                    $description = ' ';
                 }
+
+                if ($task_id > 0 && $title !== '') {
+                    
+                    $taskOwnRes = $conn->query(
+                        "SELECT 1 FROM task WHERE task_id = $task_id AND user_id = $userIdEsc LIMIT 1"
+                    );
+
+                    if ($taskOwnRes && $taskOwnRes->num_rows > 0) {
+                        $titleEsc = $conn->real_escape_string($title);
+                        $descEsc = $conn->real_escape_string($description);
+                        $conn->query(
+                            "INSERT INTO subtask (task_id, title, is_complete, description) VALUES ($task_id, '$titleEsc', $is_complete, '$descEsc')"
+                        );
+                        $flash = 'Subtask berhasil ditambahkan.';
+                    } else {
+                        $flash = 'Task yang dipilih tidak valid (tidak termasuk punya akun kamu). Debug: task_id='.(string)$task_id;
+                    }
+                } else {
+                    $flash = 'Lengkapi data subtask (task dan judul). Debug: task_id='.(string)$task_id.'; subtask_title="'.htmlspecialchars((string)$title).'"';
+                }
+
+
             }
         }
     }
@@ -92,7 +126,7 @@
         if ($resStatus && $resStatus->num_rows > 0) {
             $row = $resStatus->fetch_assoc();
             $statusVal = (int)($row['status'] ?? -1);
-            // asumsi: 0= belum, 1= aktif, 2= selesai
+            // * 0= belum, 1= aktif, 2= selesai
             // TODO : bikin ui untuk 3 state tsb
             if ($statusVal === 1) $stats['status_label'] = 'Aktif';
             else if ($statusVal === 2) $stats['status_label'] = 'Selesai';
@@ -118,15 +152,45 @@
         echo NavBar();
     ?>
 
-    <div class="ml-[5%] border border-slate-700 rounded-[5px] w-[40vw] mt-[25px] bg-slate-700/40">
-        <input type="text" class="w-[40vw] focus:outline-none px-[10px] py-[3px]" placeholder="Cari tugas...">
-    </div>
+    <?php if (!empty($flash)): ?>
+        <div class="ml-[5%] mr-[5%] mt-[15px] rounded-[8px] border border-slate-700 bg-emerald-900/20 text-emerald-200 px-[14px] py-[10px] text-sm">
+            <?php echo htmlspecialchars((string)$flash); ?>
+        </div>
+    <?php endif; ?>
 
-    <!-- category -->
-    <!--width jangan 100%, entah napa ngebug-->
-    <div class="flex w-[80%] ml-[5%] mt-[25px]">
+    <div class="flex w-[100%] mt-[25px] justify-evenly">
         <div class="w-[50%] border border-slate-700 rounded-[5px] p-[5px] bg-slate-700/40">
             <p class="border-b border-slate-700 pb-[5px]">Kategori :</p>
+
+            <form action="" method="post" class="mt-[10px] flex flex-col gap-[8px]">
+                <input type="hidden" name="action" value="add_category">
+
+                <div class="flex flex-col gap-[6px]">
+                    <label class="text-sm text-slate-200">Nama kategori</label>
+                    <input
+                        type="text"
+                        name="cat_name"
+                        required
+                        class="rounded-[6px] bg-slate-800 border border-slate-600 px-[12px] py-[8px] focus:outline-none"
+                    >
+                </div>
+
+                <div class="flex flex-col gap-[6px]">
+                    <label class="text-sm text-slate-200">Deskripsi kategori</label>
+                    <textarea
+                        name="cat_description"
+                        required
+                        class="rounded-[6px] bg-slate-800 border border-slate-600 px-[12px] py-[8px] min-h-[70px] focus:outline-none"
+                    ></textarea>
+                </div>
+
+                <button
+                    type="submit"
+                    class="w-fit rounded-[6px] bg-slate-600 hover:bg-slate-500 transition-colors px-[14px] py-[10px] font-semibold"
+                >
+                    Tambah Kategori
+                </button>
+            </form>
 
             <div class="mt-[10px] flex flex-wrap gap-[8px]">
 
@@ -157,11 +221,7 @@
                 ?>
             </div>
         </div>
-    </div>
 
-    <div class="flex w-[100%] justify-around mt-[25px]">
-
-<!--task-->
         <div class="w-[40%] border border-slate-700 rounded-[5px] p-[5px] bg-slate-700/40">
             <p class="border-b border-slate-700 pb-[5px]">Tambah Task :</p>
 
@@ -258,62 +318,9 @@
                 </button>
             </form>
         </div>
-<!--subtask-->
-        <div class="w-[40%] border border-slate-700 rounded-[5px] p-[5px] bg-slate-700/40">
-            <p class="border-b border-slate-700 pb-[5px]">Tambah Subtask :</p>
+    </div>
 
-            <form action="" method="post" class="mt-[10px] flex flex-col gap-[10px]">
-                <input type="hidden" name="action" value="add_subtask">
-
-                <div class="flex flex-col gap-[6px]">
-                    <label class="text-sm text-slate-200">Task</label>
-                    <select
-                        name="task_id"
-                        required
-                        class="rounded-[6px] bg-slate-800 border border-slate-600 px-[12px] py-[8px] focus:outline-none"
-                    >
-                        <?php
-                            $taskSelectRes = $conn->query("SELECT task_id, title FROM task WHERE user_id = $userIdEsc ORDER BY created_at DESC");
-                            if ($taskSelectRes && $taskSelectRes->num_rows > 0) {
-                                while ($taskRow = $taskSelectRes->fetch_assoc()) {
-                                    $tId = (int)$taskRow['task_id'];
-                                    $tTitle = htmlspecialchars((string)$taskRow['title']);
-                        ?>
-                                    <option value="<?php echo $tId; ?>"><?php echo $tTitle; ?></option>
-                        <?php
-                                }
-                            } else {
-                        ?>
-                                <option value="0">Belum ada task</option>
-                        <?php
-                            }
-                        ?>
-                    </select>
-                </div>
-
-                <div class="flex flex-col gap-[6px]">
-                    <label class="text-sm text-slate-200">Judul Subtask</label>
-                    <input
-                        type="text"
-                        name="subtask_title"
-                        required
-                        class="rounded-[6px] bg-slate-800 border border-slate-600 px-[12px] py-[8px] focus:outline-none"
-                    >
-                </div>
-
-                <label class="flex items-center gap-[10px] text-sm text-slate-200">
-                    <input type="checkbox" name="is_complete" value="1" class="w-[16px] h-[16px]">
-                    Tandai selesai
-                </label>
-
-                <button
-                    type="submit"
-                    class="w-fit rounded-[6px] bg-slate-600 hover:bg-slate-500 transition-colors px-[14px] py-[10px] font-semibold"
-                >
-                    Simpan Subtask
-                </button>
-            </form>
-        </div>
+    <div class="flex w-[100%] justify-around mt-[25px]">
     </div>
 
     <?php 

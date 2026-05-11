@@ -23,8 +23,45 @@ $stats = [
         'status_label' => '—',
     ];
 
+// Stats per user
+if ($userId !== null) {
+    $userIdEsc = (int)$userId;
+
+    $resTask = $conn->query("SELECT COUNT(*) AS cnt FROM task WHERE user_id = $userIdEsc");
+    if ($resTask && $row = $resTask->fetch_assoc()) {
+        $stats['task_count'] = (int)($row['cnt'] ?? 0);
+    }
+
+    $resSubtask = $conn->query(
+        "SELECT COUNT(*) AS cnt
+         FROM subtask s
+         JOIN task t ON t.task_id = s.task_id
+         WHERE t.user_id = $userIdEsc"
+    );
+    if ($resSubtask && $row = $resSubtask->fetch_assoc()) {
+        $stats['subtask_count'] = (int)($row['cnt'] ?? 0);
+    }
+
+    $resStatus = $conn->query(
+        "SELECT status, COUNT(*) AS cnt
+         FROM task
+         WHERE user_id = $userIdEsc
+         GROUP BY status
+         ORDER BY cnt DESC
+         LIMIT 1"
+    );
+    if ($resStatus && $resStatus->num_rows > 0) {
+        $row = $resStatus->fetch_assoc();
+        $statusVal = (int)($row['status'] ?? -1);
+        if ($statusVal === 1) $stats['status_label'] = 'Aktif';
+        else if ($statusVal === 2) $stats['status_label'] = 'Selesai';
+        else $stats['status_label'] = 'Belum';
+    }
+}
+
 $username = $user['username'] ?? (current_username() ?? '');
 $name = $user['name'] ?? (current_name() ?? '');
+
 
 ?>
 
@@ -57,20 +94,17 @@ $name = $user['name'] ?? (current_name() ?? '');
                 <div class="w-full flex justify-center mt-[25px]">
         <div class="w-[86%] max-w-[860px] border border-slate-700 rounded-[8px] bg-slate-700/40 p-[20px]">
             <div class="text-[20px] font-bold">Stats Profil</div>
-            <div class="mt-[12px] grid grid-cols-1 sm:grid-cols-3 gap-[14px]">
+                <div class="mt-[12px] grid grid-cols-1 sm:grid-cols-3 gap-[14px]">
                 <div class="rounded-[10px] bg-slate-800/40 border border-slate-700 p-[14px]">
-                    <div class="text-slate-300 text-sm">Pekerjaan</div>
+                    <div class="text-slate-300 text-sm">Total Pekerjaan</div>
                     <div class="text-[22px] font-bold mt-[6px]"> <?php echo htmlspecialchars((string)$stats['task_count']); ?> </div>
-                </div>
-                <div class="rounded-[10px] bg-slate-800/40 border border-slate-700 p-[14px]">
-                    <div class="text-slate-300 text-sm">Subtask</div>
-                    <div class="text-[22px] font-bold mt-[6px]"> <?php echo htmlspecialchars((string)$stats['subtask_count']); ?> </div>
                 </div>
                 <div class="rounded-[10px] bg-slate-800/40 border border-slate-700 p-[14px]">
                     <div class="text-slate-300 text-sm">Status</div>
                     <div class="text-[22px] font-bold mt-[6px]"> <?php echo htmlspecialchars((string)$stats['status_label']); ?> </div>
                 </div>
             </div>
+
         </div>
     </div>
 
