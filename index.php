@@ -40,7 +40,6 @@
         if ($resStatus && $resStatus->num_rows > 0) {
             $row = $resStatus->fetch_assoc();
             $statusVal = (int)($row['status'] ?? -1);
-            // 0=belum, 1=aktif, 2=selesai
             if ($statusVal === 1) $stats['status_label'] = 'Aktif';
             else if ($statusVal === 2) $stats['status_label'] = 'Selesai';
             else $stats['status_label'] = 'Belum';
