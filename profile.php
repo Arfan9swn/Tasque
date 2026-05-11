@@ -1,7 +1,25 @@
 <?php
 
 require_once "./dbconn.php";
+require_once "./auth.php";
+
+require_login();
+
 $conn = dbConnect();
+$userId = current_user_id();
+
+// Fetch current user
+$user = null;
+if ($userId !== null) {
+    $userIdEsc = (int)$userId;
+    $res = $conn->query("SELECT * FROM user WHERE user_id = $userIdEsc LIMIT 1");
+    if ($res && $res->num_rows === 1) {
+        $user = $res->fetch_assoc();
+    }
+}
+
+$username = $user['username'] ?? (current_username() ?? '');
+$name = $user['name'] ?? (current_name() ?? '');
 
 ?>
 
@@ -26,9 +44,8 @@ $conn = dbConnect();
                 <div class="flex items-start gap-[18px]">
 
                     <div class="flex flex-col gap-[6px] flex-1">
-                        <div class="text-[26px] font-bold leading-none">Nama Pengguna</div>
-                        <div class="text-slate-200">@username</div>
-                        <div class="text-slate-300 text-sm">user@example.com</div>
+                        <div class="text-[26px] font-bold leading-none"><?php echo htmlspecialchars($name); ?></div>
+                        <div class="text-slate-200">@<?php echo htmlspecialchars($username); ?></div>
                     </div>
                 </div>
 
@@ -48,7 +65,7 @@ $conn = dbConnect();
                 </div>
 
                 <div class="mt-[18px] flex flex-col sm:flex-row gap-[10px] sm:justify-end">
-                    <a href="./login.php" class="text-center rounded-[8px] bg-slate-600 hover:bg-slate-500 transition-colors px-[14px] py-[10px] font-semibold">
+                    <a href="./logout.php" class="text-center rounded-[8px] bg-slate-600 hover:bg-slate-500 transition-colors px-[14px] py-[10px] font-semibold">
                         Logout
                     </a>
                 </div>
@@ -63,4 +80,5 @@ $conn = dbConnect();
 
 </body>
 </html>
+
 

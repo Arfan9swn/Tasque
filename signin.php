@@ -27,7 +27,51 @@
                 <div class="text-slate-200">Buat akun baru</div>
             </div>
 
+<?php
+
+require_once "./dbconn.php";
+require_once "./auth.php";
+
+$err = null;
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $fullName = trim($_POST['name'] ?? '');
+    $username = trim($_POST['username'] ?? '');
+    $password = (string)($_POST['password'] ?? '');
+
+    if ($username === '' || $password === '') {
+        $err = 'Username dan password wajib diisi.';
+    } else {
+        $conn = dbConnect();
+
+        $usernameEsc = $conn->real_escape_string($username);
+        $hash = md5($password);
+        $hashEsc = $conn->real_escape_string($hash);
+        $nameEsc = $conn->real_escape_string($fullName);
+
+        $check = $conn->query("SELECT user_id FROM user WHERE username = '$usernameEsc' LIMIT 1");
+        if ($check && $check->num_rows > 0) {
+            $err = 'Username sudah digunakan.';
+        } else {
+            $insert = $conn->query("INSERT INTO user (username, password, name) VALUES ('$usernameEsc', '$hashEsc', '$nameEsc')");
+            if ($insert) {
+                header('Location: ./login.php');
+                exit;
+            }
+            $err = 'Gagal membuat akun.';
+        }
+    }
+}
+
+?>
+
             <form action="" method="post" class="flex flex-col gap-[12px]">
+                <?php if ($err): ?>
+                    <div class="rounded-[8px] border border-red-700 bg-red-900/20 text-red-200 px-[12px] py-[10px] text-sm">
+                        <?= htmlspecialchars($err) ?>
+                    </div>
+                <?php endif; ?>
+
                 <div class="flex flex-col gap-2">
                     <label for="name" class="text-sm text-slate-200">Nama</label>
                     <input
@@ -68,6 +112,7 @@
                     Daftar
                 </button>
             </form>
+
 
             <div class="mt-[14px] text-center text-sm">
                 <span class="text-slate-200">Sudah punya akun? </span>

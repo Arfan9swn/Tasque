@@ -13,6 +13,40 @@
     <title>Log in</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 </head>
+<?php
+
+require_once "./dbconn.php";
+require_once "./auth.php";
+
+$err = null;
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $username = trim($_POST['username'] ?? '');
+    $password = (string)($_POST['password'] ?? '');
+
+    if ($username === '' || $password === '') {
+        $err = 'Username dan password wajib diisi.';
+    } else {
+        $conn = dbConnect();
+
+        $usernameEsc = $conn->real_escape_string($username);
+        $hash = md5($password);
+        $hashEsc = $conn->real_escape_string($hash);
+
+        $res = $conn->query("SELECT user_id, username FROM user WHERE username = '$usernameEsc' AND password = '$hashEsc' LIMIT 1");
+        if ($res && $res->num_rows === 1) {
+            $row = $res->fetch_assoc();
+            $_SESSION['user_id'] = (int)$row['user_id'];
+            $_SESSION['username'] = (string)$row['username'];
+            header('Location: ./index.php');
+            exit;
+        }
+
+        $err = 'Username atau password salah.';
+    }
+}
+
+?>
 <body class="bg-slate-800 text-white min-h-screen">
 
     <?php
@@ -28,7 +62,14 @@
             </div>
 
             <form action="" method="post" class="flex flex-col gap-[12px]">
+                <?php if ($err): ?>
+                    <div class="rounded-[8px] border border-red-700 bg-red-900/20 text-red-200 px-[12px] py-[10px] text-sm">
+                        <?= htmlspecialchars($err) ?>
+                    </div>
+                <?php endif; ?>
+
                 <div class="flex flex-col gap-2">
+
                     <label for="username" class="text-sm text-slate-200">Username</label>
                     <input
                         id="username"
