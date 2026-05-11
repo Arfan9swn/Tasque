@@ -6,7 +6,49 @@
 
     require_login();
 
+    $userId = current_user_id();
+
+    $stats = [
+        'task_count' => 0,
+        'subtask_count' => 0,
+        'status_label' => '—',
+    ];
+
+    if ($userId !== null) {
+        $userIdEsc = (int)$userId;
+
+        $resTask = $conn->query("SELECT COUNT(*) AS cnt FROM task WHERE user_id = $userIdEsc");
+        if ($resTask) {
+            $row = $resTask->fetch_assoc();
+            $stats['task_count'] = (int)($row['cnt'] ?? 0);
+        }
+
+        $resSub = $conn->query("SELECT COUNT(*) AS cnt
+                                 FROM subtask
+                                 WHERE task_id IN (SELECT task_id FROM task WHERE user_id = $userIdEsc)");
+        if ($resSub) {
+            $row = $resSub->fetch_assoc();
+            $stats['subtask_count'] = (int)($row['cnt'] ?? 0);
+        }
+
+        $resStatus = $conn->query("SELECT status, COUNT(*) AS cnt
+                                    FROM task
+                                    WHERE user_id = $userIdEsc
+                                    GROUP BY status
+                                    ORDER BY cnt DESC
+                                    LIMIT 1");
+        if ($resStatus && $resStatus->num_rows > 0) {
+            $row = $resStatus->fetch_assoc();
+            $statusVal = (int)($row['status'] ?? -1);
+            // 0=belum, 1=aktif, 2=selesai
+            if ($statusVal === 1) $stats['status_label'] = 'Aktif';
+            else if ($statusVal === 2) $stats['status_label'] = 'Selesai';
+            else $stats['status_label'] = 'Belum';
+        }
+    }
+
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -37,15 +79,31 @@
                     Tambah Kategori +
                 </div>
 
-                <div class="border border-slate-700 rounded-[999px] w-fit px-[12px] py-[4px] bg-slate-700/40 text-slate-200 text-sm">
-                    Pekerjaan
-                </div>
-                <div class="border border-slate-700 rounded-[999px] w-fit px-[12px] py-[4px] bg-slate-700/40 text-slate-200 text-sm">
-                    Pribadi
-                </div>
-                <div class="border border-slate-700 rounded-[999px] w-fit px-[12px] py-[4px] bg-slate-700/40 text-slate-200 text-sm">
-                    Belajar
-                </div>
+                <?php
+                    $categories = [];
+                    $catRes = $conn->query("SELECT cat_id, name FROM category ORDER BY name ASC");
+                    if ($catRes) {
+                        while ($row = $catRes->fetch_assoc()) {
+                            $categories[] = $row;
+                        }
+                    }
+
+                    if (count($categories) === 0) {
+                ?>
+                        <div class="border border-slate-700 rounded-[999px] w-fit px-[12px] py-[4px] bg-slate-700/40 text-slate-200 text-sm">
+                            Belum ada kategori
+                        </div>
+                <?php
+                    } else {
+                        foreach ($categories as $cat) {
+                ?>
+                        <div class="border border-slate-700 rounded-[999px] w-fit px-[12px] py-[4px] bg-slate-700/40 text-slate-200 text-sm">
+                            <?php echo htmlspecialchars($cat['name']); ?>
+                        </div>
+                <?php
+                        }
+                    }
+                ?>
             </div>
         </div>
     </div>

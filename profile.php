@@ -17,6 +17,12 @@ if ($userId !== null) {
     }
 }
 
+$stats = [
+        'task_count' => 0,
+        'subtask_count' => 0,
+        'status_label' => '—',
+    ];
+
 $username = $user['username'] ?? (current_username() ?? '');
 $name = $user['name'] ?? (current_name() ?? '');
 
@@ -48,20 +54,25 @@ $name = $user['name'] ?? (current_name() ?? '');
                     </div>
                 </div>
 
-                <div class="mt-[18px] grid grid-cols-1 sm:grid-cols-3 gap-[14px]">
-                    <div class="rounded-[10px] bg-slate-800/40 border border-slate-700 p-[14px]">
-                        <div class="text-slate-300 text-sm">Pekerjaan</div>
-                        <div class="text-[22px] font-bold mt-[6px]">12</div>
-                    </div>
-                    <div class="rounded-[10px] bg-slate-800/40 border border-slate-700 p-[14px]">
-                        <div class="text-slate-300 text-sm">Subtask</div>
-                        <div class="text-[22px] font-bold mt-[6px]">48</div>
-                    </div>
-                    <div class="rounded-[10px] bg-slate-800/40 border border-slate-700 p-[14px]">
-                        <div class="text-slate-300 text-sm">Status</div>
-                        <div class="text-[22px] font-bold mt-[6px]">Aktif</div>
-                    </div>
+                <div class="w-full flex justify-center mt-[25px]">
+        <div class="w-[86%] max-w-[860px] border border-slate-700 rounded-[8px] bg-slate-700/40 p-[20px]">
+            <div class="text-[20px] font-bold">Stats Profil</div>
+            <div class="mt-[12px] grid grid-cols-1 sm:grid-cols-3 gap-[14px]">
+                <div class="rounded-[10px] bg-slate-800/40 border border-slate-700 p-[14px]">
+                    <div class="text-slate-300 text-sm">Pekerjaan</div>
+                    <div class="text-[22px] font-bold mt-[6px]"> <?php echo htmlspecialchars((string)$stats['task_count']); ?> </div>
                 </div>
+                <div class="rounded-[10px] bg-slate-800/40 border border-slate-700 p-[14px]">
+                    <div class="text-slate-300 text-sm">Subtask</div>
+                    <div class="text-[22px] font-bold mt-[6px]"> <?php echo htmlspecialchars((string)$stats['subtask_count']); ?> </div>
+                </div>
+                <div class="rounded-[10px] bg-slate-800/40 border border-slate-700 p-[14px]">
+                    <div class="text-slate-300 text-sm">Status</div>
+                    <div class="text-[22px] font-bold mt-[6px]"> <?php echo htmlspecialchars((string)$stats['status_label']); ?> </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
                 <div class="mt-[18px] flex flex-col sm:flex-row gap-[10px] sm:justify-end">
                     <a href="./logout.php" class="text-center rounded-[8px] bg-slate-600 hover:bg-slate-500 transition-colors px-[14px] py-[10px] font-semibold">
