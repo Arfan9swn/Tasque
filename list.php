@@ -8,7 +8,6 @@
     $userId = current_user_id();
     $userIdEsc = (int)($userId ?? 0);
 
-    // ---- helpers
     function statusLabel(int $status): string {
         if ($status === 1) return 'Aktif';
         if ($status === 2) return 'Selesai';
@@ -22,6 +21,8 @@
             default    => 'border-slate-700 bg-slate-700/40 text-slate-200'
         };
     }
+
+    // ! any mention of subtasks are deprecated
 
     $flash = null;
     $flashType = 'default';
@@ -54,7 +55,6 @@
                 }
             }
 
-            // update task status
             if ($action === 'update_task_status') {
                 $task_id = (int)($_POST['task_id'] ?? 0);
                 $status = (int)($_POST['status'] ?? -1);
@@ -62,8 +62,8 @@
                 if ($task_id > 0 && in_array($status, [0,1,2], true)) {
                     $conn->query(
                         "UPDATE task t
-                         SET t.status = $status
-                         WHERE t.task_id = $task_id AND t.user_id = $userIdEsc"
+                        SET t.status = $status
+                        WHERE t.task_id = $task_id AND t.user_id = $userIdEsc"
                     );
 
                     $flash = 'Status task diperbarui.';
@@ -72,7 +72,6 @@
             }
 
 
-            // update subtask title/description
             if ($action === 'update_subtask') {
                 $subtask_id = (int)($_POST['subtask_id'] ?? 0);
                 $title = trim((string)($_POST['subtask_title'] ?? ''));

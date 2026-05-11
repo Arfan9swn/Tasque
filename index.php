@@ -15,6 +15,8 @@ error_reporting(E_ALL);
 
     $flash = null;
 
+    // ! any mention of subtasks are deprecated, dont use ANY functions regarding subtasks
+
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         $action = (string)($_POST['action'] ?? '');
         $userIdEsc = (int)($userId ?? 0);
