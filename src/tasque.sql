@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: May 11, 2026 at 03:07 AM
+-- Generation Time: May 11, 2026 at 08:03 AM
 -- Server version: 8.0.30
 -- PHP Version: 8.1.10
 
@@ -43,7 +43,8 @@ CREATE TABLE `subtask` (
   `subtask_id` int NOT NULL,
   `task_id` int NOT NULL,
   `title` varchar(50) NOT NULL,
-  `is_complete` tinyint(1) NOT NULL
+  `is_complete` tinyint(1) NOT NULL,
+  `description` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
@@ -73,16 +74,16 @@ CREATE TABLE `task` (
 CREATE TABLE `user` (
   `user_id` int NOT NULL,
   `username` varchar(50) NOT NULL,
-  `email` varchar(50) NOT NULL,
-  `password` varchar(32) NOT NULL
+  `password` varchar(32) NOT NULL,
+  `name` varchar(50) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `user`
 --
 
-INSERT INTO `user` (`user_id`, `username`, `email`, `password`) VALUES
-(1, 'JOHN', 'johndoe@gmail.com', '12345678');
+INSERT INTO `user` (`user_id`, `username`, `password`, `name`) VALUES
+(3, 'CK1887', '25d55ad283aa400af464c76d713c07ad', 'Charlie Kirk');
 
 --
 -- Indexes for dumped tables
@@ -116,7 +117,7 @@ ALTER TABLE `task`
 -- Indexes for table `user`
 --
 ALTER TABLE `user`
-  ADD PRIMARY KEY (`user_id`),
+  ADD PRIMARY KEY (`user_id`,`name`),
   ADD KEY `user_id` (`user_id`);
 
 --
@@ -127,13 +128,13 @@ ALTER TABLE `user`
 -- AUTO_INCREMENT for table `category`
 --
 ALTER TABLE `category`
-  MODIFY `cat_id` int NOT NULL AUTO_INCREMENT;
+  MODIFY `cat_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `user`
 --
 ALTER TABLE `user`
-  MODIFY `user_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `user_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- Constraints for dumped tables

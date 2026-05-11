@@ -9,7 +9,7 @@
                     </div>
                         <div class="font-semibold flex gap-[50px] justify-center text-center">
                             <div class="justify-center">
-                                <a href="./index.php">List</a>
+                                <a href="./index.php">Buat</a>
                             </div>
                             <div class="justify-center">
                                 <a href="./about.php">Tentang</a>
