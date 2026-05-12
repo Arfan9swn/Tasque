@@ -57,7 +57,7 @@ error_reporting(E_ALL);
                     $titleEsc = $conn->real_escape_string($title);
                     $descEsc = $conn->real_escape_string($description);
 
-                    $conn->query("INSERT INTO task (user_id, cat_id, title, description, due_date, priority, status, created_at) VALUES ($userIdEsc, $cat_id, '$titleEsc', '$descEsc', '$due_date', $priority, $status, CURDATE())");
+                    $conn->query("INSERT INTO task (task_id, user_id, cat_id, title, description, due_date, priority, status, created_at) VALUES ($nextTaskId, $userIdEsc, $cat_id, '$titleEsc', '$descEsc', '$due_date', $priority, $status, CURDATE())");
                     $flash = 'Task berhasil ditambahkan.';
                 } else {
                     $flash = 'Lengkapi data task (judul, deskripsi, due date, kategori).';
@@ -98,6 +98,31 @@ error_reporting(E_ALL);
                 }
 
 
+            }
+
+            if ($action === 'delete_category') {
+                $cat_id = (int)($_POST['cat_id'] ?? 0);
+                if ($cat_id > 0) {
+                    $conn->query(
+                        "DELETE s FROM subtask s
+                         JOIN task t ON t.task_id = s.task_id
+                         WHERE t.user_id = $userIdEsc AND t.cat_id = $cat_id"
+                    );
+
+                    $conn->query(
+                        "DELETE FROM task
+                         WHERE user_id = $userIdEsc AND cat_id = $cat_id"
+                    );
+
+                    $conn->query(
+                        "DELETE FROM category
+                         WHERE cat_id = $cat_id AND cat_id IS NOT NULL"
+                    );
+
+                    $flash = 'Kategori berhasil dihapus.';
+                } else {
+                    $flash = 'Kategori tidak valid untuk dihapus.';
+                }
             }
         }
     }
@@ -186,13 +211,13 @@ error_reporting(E_ALL);
                     ></textarea>
                 </div>
 
-                <button
-                    type="submit"
-                    class="w-fit rounded-[6px] bg-slate-600 hover:bg-slate-500 transition-colors px-[14px] py-[10px] font-semibold"
-                >
-                    Tambah Kategori
-                </button>
-            </form>
+                    <button
+                        type="submit"
+                        class="w-fit rounded-[6px] bg-slate-600 hover:bg-slate-500 transition-colors px-[14px] py-[10px] font-semibold"
+                    >
+                        Tambah Kategori
+                    </button>
+                </form>
 
             <div class="mt-[10px] flex flex-wrap gap-[8px]">
 
@@ -213,9 +238,21 @@ error_reporting(E_ALL);
                 <?php
                     } else {
                         foreach ($categories as $cat) {
+                            $catId = (int)($cat['cat_id'] ?? 0);
                 ?>
                         <div class="border border-slate-700 rounded-[999px] w-fit px-[12px] py-[4px] bg-slate-700/40 text-slate-200 text-sm">
-                            <?php echo htmlspecialchars($cat['name']); ?>
+                            <div class="flex items-center gap-[10px]">
+                                <span><?php echo htmlspecialchars((string)$cat['name']); ?></span>
+                                <?php if ($catId > 0): ?>
+                                    <form method="post" action="" onsubmit="return confirm('Hapus kategori ini? Semua task di kategori ini juga akan ikut terhapus.');">
+                                        <input type="hidden" name="action" value="delete_category">
+                                        <input type="hidden" name="cat_id" value="<?php echo $catId; ?>">
+                                        <button type="submit" class="rounded-[999px] border border-red-700 bg-red-900/20 hover:bg-red-900/30 text-red-200 px-[10px] py-[2px] text-xs">
+                                            Hapus
+                                        </button>
+                                    </form>
+                                <?php endif; ?>
+                            </div>
                         </div>
                 <?php
                         }

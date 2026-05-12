@@ -35,7 +35,6 @@
             if ($action === 'delete_task') {
                 $task_id = (int)($_POST['task_id'] ?? 0);
                 if ($task_id > 0) {
-                    $conn->query("DELETE FROM subtask WHERE task_id = $task_id");
                     $conn->query("DELETE FROM task WHERE task_id = $task_id AND user_id = $userIdEsc");
                 }
             }
@@ -201,6 +200,14 @@
                                     <div class="text-slate-200 text-sm mt-[8px]">
                                         <?php echo nl2br(htmlspecialchars((string)$t['task_description'])); ?>
                                     </div>
+
+                                    <form method="post" action="" class="mt-[10px]" onsubmit="return confirm('Hapus task ini? Task beserta subtask akan ikut terhapus.');">
+                                        <input type="hidden" name="action" value="delete_task">
+                                        <input type="hidden" name="task_id" value="<?php echo $tid; ?>">
+                                        <button type="submit" class="w-fit rounded-[8px] border border-red-700 bg-red-900/20 hover:bg-red-900/30 text-red-200 px-[12px] py-[8px] text-sm font-semibold">
+                                            Hapus Task
+                                        </button>
+                                    </form>
 
                                 </div>
 
